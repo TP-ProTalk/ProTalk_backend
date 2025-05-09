@@ -25,7 +25,7 @@ class AuthService:
                 )
 
             # Создание пользователя
-            hashed_password = get_password_hash(user_data.hashed_password)
+            hashed_password = get_password_hash(user_data.password)
             confirmation_token = generate_confirmation_token()
 
             user = User(
