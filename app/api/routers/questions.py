@@ -16,7 +16,6 @@ async def create_question(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_session)
 ):
-    breakpoint()
     return QuestionService.create_question(db, question_data)
 
 @router.get("/", response_model=List[QuestionResponse])
