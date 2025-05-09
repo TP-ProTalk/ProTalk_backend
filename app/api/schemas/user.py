@@ -12,11 +12,11 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     email: EmailStr
-    hashed_password: str
-    phone_number: str
-    age: int
-    sex: str
-    grade: str
+    password: str
+    phone_number: str | None = None
+    age: int | None = None
+    sex: str | None = None
+    grade: str | None = None
 
 class UserInDB(UserBase):
     id: int
