@@ -3,7 +3,7 @@ name: Deploy Backend
 on:
   push:
     branches:
-      - main   # или ветка, из которой деплоишь
+      - main
 
 jobs:
   deploy:
@@ -21,9 +21,29 @@ jobs:
           key: ${{ secrets.SERVER_KEY }}
           port: 22
           script: |
-            cd /root/ProTalk_backend   # укажи путь к проекту на сервере
-            git pull origin main       # обновляем код
-            docker-compose down        # останавливаем контейнеры (если используешь docker-compose)
-            docker-compose up -d --build   # поднимаем контейнеры с билдом
-            # или команды для перезапуска сервиса без Docker, например:
-            # systemctl restart protalk-backend.service
+            cd /root/ProTalk_backend
+            git pull origin main
+
+            # Останавливаем контейнеры, чтобы не было конфликтов
+            docker-compose down
+
+            # Собираем и запускаем контейнеры в фоне
+            docker-compose up -d --build
+
+            # Ждем, пока база станет здоровой (max 30 сек)
+            echo "Waiting for DB to become healthy..."
+            for i in {1..30}; do
+              status=$(docker inspect --format='{{.State.Health.Status}}' protalk_backend_db_1)
+              if [ "$status" = "healthy" ]; then
+                echo "DB is healthy"
+                break
+              fi
+              echo "Waiting for DB... ($i)"
+              sleep 1
+            done
+
+            if [ "$status" != "healthy" ]; then
+              echo "DB did not become healthy, aborting"
+              exit 1
+            fi
+
